@@ -6,7 +6,7 @@ all: build
 LOCALBIN ?= $(shell pwd)/bin
 KUBECTL?=kubectl
 
-IMAGE_REGISTRY ?= quay.io/open-cluster-management
+IMAGE_REGISTRY ?= quay.io/haoqing
 IMAGE_TAG ?= latest
 IMAGE_NAME ?= $(IMAGE_REGISTRY)/kueue-addon:$(IMAGE_TAG)
 
