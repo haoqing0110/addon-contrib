@@ -37,3 +37,6 @@ clusterQueue:
 localQueue:
   name: user-queue
   namespace: default
+
+# Kueue namespace for controller
+kueueNamespace: "kueue-system"
