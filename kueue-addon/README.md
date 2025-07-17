@@ -61,9 +61,18 @@ make deploy
 
 You can install the addons via the helm charts.
 
-```bash
-helm install kueue-addon charts/kueue-addon/ \
-  -n open-cluster-management-addon --create-namespace 
+```
+$ helm repo add ocm https://open-cluster-management.io/helm-charts/
+$ helm repo update
+$ helm search repo ocm/kueue-addon
+NAME            CHART VERSION   APP VERSION     DESCRIPTION
+ocm/kueue-addon <chart-version> <app-version>           A Helm chart for Open Cluster Management Kueue ...
+$ helm install \
+    -n open-cluster-management-addon --create-namespace \
+    kueue-addon ocm/kueue-addon
+    # Uncomment the following lines to customize your installation:
+    # --set skipClusterSetBinding=true \
+    # --set image.tag=<chart-version> \
 ```
 
 To confirm the installation from hub:
