@@ -114,7 +114,8 @@ This controller is running on the hub, contains a credential controller and an a
 ### Addon chart
 - **Addon deployment:** Deploy [Kueue addon controllers](#kueue-addon-controller) on the hub.
 - **Addon Template:** To deploy `ResourceFlavor`, `ClusterQueue` and `LocalQueue` resources need by MultiKueue to spoke clusters.
-- **Other addon files:**  `ClusterManagementAddOn`, `ClusterRole`, `ClusterRoleBinding`, `ManagedClusterSetBinding`, `Placement` etc. 
+- **Kueue Operator Template:** Optional operator-based Kueue installation spoke clusters.
+- **Other addon files:**  `ClusterManagementAddOn`, `ClusterRole`, `ClusterRoleBinding`, `ManagedClusterSetBinding`, `Placement` etc.
 
 ## Prerequisites
 
@@ -131,13 +132,27 @@ The whole setup steps about this solution, please refer to this [Kueue Integrati
 
 ## Installation
 
-On the hub cluster, deploy the addon.
+### Method 1: Using Makefile
+
+On the hub cluster, deploy the addon:
 
 ```bash
 make deploy
 ```
 
-You can install the addons via the helm charts.
+### Method 2: Using Helm Charts
+
+The addon supports two installation approaches:
+
+**Option 1: Manual Kueue Installation**
+- Kueue already installed on the hub and spoke cluster
+
+**Option 2: Operator-based Installation**
+- [Kueue operator](https://github.com/openshift/kueue-operator) available in your cluster
+
+#### Option 1: Manual Kueue Installation
+
+Install the addon with manually pre-installed Kueue:
 
 ```bash
 $ helm repo add ocm https://open-cluster-management.io/helm-charts/
@@ -151,6 +166,49 @@ $ helm install \
     # Uncomment the following lines to customize your installation:
     # --set skipClusterSetBinding=true \
     # --set image.tag=<chart-version> \
+```
+
+#### Option 2: Operator-based Kueue Installation
+
+Install the addon with automatic Kueue operator deployment:
+
+Prepare a values.override.yaml with below content:
+
+```yaml
+# Install Kueue via Operator (OpenShift/downstream only)
+installKueueViaOperator: true
+
+# Operator Lifecycle Manager RBAC configuration
+operatorLifecycleManager:
+  clusterRoleBindingName: kueue-operator-lifecycle-manager-rolebinding
+  clusterRoleName: system:controller:operator-lifecycle-manager
+
+# Kueue Operator configuration
+kueueOperator:
+  name: kueue-operator
+  namespace: openshift-kueue-operator
+  operatorGroupName: openshift-kueue-operator
+  channel: stable-v1.0
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+  startingCSV: kueue-operator.v1.0.0
+
+# Cert Manager Operator configuration
+certManagerOperator:
+  name: openshift-cert-manager-operator
+  namespace: cert-manager-operator
+  operatorGroupName: cert-manager-operator
+  channel: stable-v1
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+  startingCSV: cert-manager-operator.v1.16.1
+```
+
+```bash
+$ helm install \
+    -n open-cluster-management-addon --create-namespace \
+    -f values.override.yaml \
+    kueue-addon ocm/kueue-addon
 ```
 
 To confirm the installation from hub:
@@ -298,4 +356,3 @@ This automation greatly reduces manual effort and ensures that MultiKueue enviro
 - The admission check controller watches for `AdmissionCheck` resources referencing OCM `Placement`.
 - The admission check controller watches the `PlacementDecision`, creates or updates `MultiKueueCluster` resources with the kubeconfig details for each cluster, and also update these clusters in the `MultiKueueConfig` resource.
 - Finally, admission check controller updates the `AdmissionCheck` condition to true, indicating successful generation of the `MultiKueueConfig` and `MultiKueueCluster`, readying the [MultiKueue](https://kueue.sigs.k8s.io/docs/concepts/multikueue/) environment for job scheduling.
-

@@ -38,3 +38,36 @@ clusterQueue:
 localQueue:
   name: user-queue
   namespace: default
+
+# This is the namespace where the kueue controller is installed, will copy the multikueue secret to this namespace
+# Default is kueue-system
+kueue:
+  namespace: "kueue-system"
+
+# Install Kueue via Operator
+installKueueViaOperator: false
+
+# Operator Lifecycle Manager RBAC configuration (uncomment when needed)
+# operatorLifecycleManager:
+#   clusterRoleBindingName: <cluster-role-binding-name>
+#   clusterRoleName: <cluster-role-name>
+
+# Kueue Operator configuration (uncomment when needed)
+# kueueOperator:
+#   name: <operator-name>
+#   namespace: <operator-namespace>
+#   operatorGroupName: <operator-group-name>
+#   channel: <channel-version>
+#   source: <operator-source>
+#   sourceNamespace: <source-namespace>
+#   startingCSV: <starting-csv>
+
+# Cert Manager Operator configuration (uncomment when needed)
+# certManagerOperator:
+#   name: <cert-manager-operator-name>
+#   namespace: <cert-manager-namespace>
+#   operatorGroupName: <cert-manager-operator-group>
+#   channel: <cert-manager-channel>
+#   source: <cert-manager-source>
+#   sourceNamespace: <cert-manager-source-namespace>
+#   startingCSV: <cert-manager-starting-csv>
