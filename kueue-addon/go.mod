@@ -1,6 +1,6 @@
 module open-cluster-management.io/addon-contrib/kueue-addon
 
-go 1.23.6
+go 1.24.5
 
 require (
 	github.com/openshift/library-go v0.0.0-20250228164547-bad2d1bf3a37
@@ -17,7 +17,7 @@ require (
 	open-cluster-management.io/managed-serviceaccount v0.8.1-0.20250529020500-f25dcf870662
 	open-cluster-management.io/ocm v0.16.1-0.20250430081522-df87f528d7d7
 	open-cluster-management.io/sdk-go v0.16.1-0.20250428032116-875454003818
-	sigs.k8s.io/kueue v0.9.1
+	sigs.k8s.io/kueue v0.11.8
 )
 
 require (
@@ -106,7 +106,7 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/apiextensions-apiserver v0.32.2 // indirect
+	k8s.io/apiextensions-apiserver v0.32.3 // indirect
 	k8s.io/apiserver v0.32.4 // indirect
 	k8s.io/kms v0.32.4 // indirect
 	k8s.io/kube-aggregator v0.32.1 // indirect
