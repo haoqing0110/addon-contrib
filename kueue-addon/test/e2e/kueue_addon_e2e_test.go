@@ -90,7 +90,7 @@ var _ = Describe("MultiKueue Scenarios", func() {
 							},
 						}},
 					}},
-					AdmissionChecks: []string{"multikueue-e2e", "multikueue-config-e2e"},
+					AdmissionChecks: []kueuev1beta1.AdmissionCheckReference{"multikueue-e2e", "multikueue-config-e2e"},
 				},
 			}
 			_, err = hubKueueClient.KueueV1beta1().ClusterQueues().Create(ctx, clusterQueue, metav1.CreateOptions{})

@@ -34,15 +34,17 @@ hub=${HUB:-local-cluster}
 c1=${CLUSTER1:-cluster1}
 c2=${CLUSTER2:-cluster2}
 c3=${CLUSTER3:-cluster3}
+c4=${CLUSTER4:-cluster4}
 
 hubctx="kind-${hub}"
 c1ctx="kind-${c1}"
 c2ctx="kind-${c2}"
 c3ctx="kind-${c3}"
+c4ctx="kind-${c4}"
 
-spoke_clusters=(${c1} ${c2} ${c3})
+spoke_clusters=(${c1} ${c2} ${c3} ${c4})
 all_clusters=(${hub} ${spoke_clusters[@]})
-spoke_ctx=(${c1ctx} ${c2ctx} ${c3ctx})
+spoke_ctx=(${c1ctx} ${c2ctx} ${c3ctx} ${c4ctx})
 all_ctx=(${hubctx} ${spoke_ctx[@]})
 
 kueue_manifest="https://github.com/kubernetes-sigs/kueue/releases/download/${KUEUE_VERSION}/manifests.yaml"
@@ -78,9 +80,10 @@ setup_ocm() {
   eval "${joincmd//<cluster_name>/${c1}} --force-internal-endpoint-lookup --wait --context ${c1ctx}"
   eval "${joincmd//<cluster_name>/${c2}} --force-internal-endpoint-lookup --wait --context ${c2ctx}"
   eval "${joincmd//<cluster_name>/${c3}} --force-internal-endpoint-lookup --wait --context ${c3ctx}"
+  eval "${joincmd//<cluster_name>/${c4}} --force-internal-endpoint-lookup --wait --context ${c4ctx}"
 
   echo "Accept join of clusters"
-  clusteradm accept --context ${hubctx} --clusters ${hub},${c1},${c2},${c3} --wait
+  clusteradm accept --context ${hubctx} --clusters ${hub},${c1},${c2},${c3},${c4} --wait
 
   # label local-cluster
   kubectl label managedclusters ${hub} local-cluster=true --context ${hubctx}
@@ -97,7 +100,7 @@ install_kueue() {
       kubectl apply --server-side -f "$jobset_manifest" --context "$ctx"
   done
 
-  for ctx in "${spoke_ctx[@]}"; do
+  for ctx in "${all_ctx[@]}"; do
       echo "Install Kubeflow MPI Operator, Training Operator on $ctx"
       kubectl apply --server-side -f "$mpi_operator_manifest" --context "$ctx" || true
       kubectl apply --server-side -f "$appwrapper_manifest" --context "$ctx" || true

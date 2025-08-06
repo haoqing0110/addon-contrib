@@ -1,0 +1,93 @@
+apiVersion: kueue.x-k8s.io/v1beta1
+kind: ResourceFlavor
+metadata:
+  name: "default-flavor"
+---
+apiVersion: kueue.x-k8s.io/v1beta1
+kind: ClusterQueue
+metadata:
+  name: "cluster-queue"
+spec:
+  namespaceSelector: {} # match all.
+  resourceGroups:
+  - coveredResources: ["cpu", "memory","nvidia.com/gpu"]
+    flavors:
+    - name: "default-flavor"
+      resources:
+      - name: "cpu"
+        nominalQuota: 5
+      - name: "memory"
+        nominalQuota: 5Gi
+      - name: "nvidia.com/gpu"
+        nominalQuota: 3
+  admissionChecks:
+  - multikueue-demo1
+---
+apiVersion: kueue.x-k8s.io/v1beta1
+kind: LocalQueue
+metadata:
+  namespace: "default"
+  name: "user-queue"
+spec:
+  clusterQueue: "cluster-queue"
+---
+apiVersion: kueue.x-k8s.io/v1beta1
+kind: AdmissionCheck
+metadata:
+  name: multikueue-demo1
+spec:
+  controllerName: kueue.x-k8s.io/multikueue
+  parameters:
+    apiGroup: kueue.x-k8s.io
+    kind: MultiKueueConfig
+    name: multikueue-config-demo1
+---
+apiVersion: kueue.x-k8s.io/v1beta1
+kind: MultiKueueConfig
+metadata:
+  name:  multikueue-config-demo1
+spec:
+  clusters:
+  - multikueue-config-demo1-cluster1
+  - multikueue-config-demo1-cluster2
+  - multikueue-config-demo1-cluster3
+  - multikueue-config-demo1-cluster4
+---
+apiVersion: kueue.x-k8s.io/v1beta1
+kind: MultiKueueCluster
+metadata:
+  name: multikueue-config-demo1-cluster1
+spec:
+  kubeConfig:
+    locationType: Secret
+    location: multikueue-cluster1
+    # a secret called " multikueue-cluster1" should be created in the namespace the kueue
+    # controller manager runs into, holding the kubeConfig needed to connect to the
+    # worker cluster in the "kubeconfig" key;
+---
+apiVersion: kueue.x-k8s.io/v1beta1
+kind: MultiKueueCluster
+metadata:
+  name: multikueue-config-demo1-cluster2
+spec:
+  kubeConfig:
+    locationType: Secret
+    location: multikueue-cluster2
+---
+apiVersion: kueue.x-k8s.io/v1beta1
+kind: MultiKueueCluster
+metadata:
+  name: multikueue-config-demo1-cluster3
+spec:
+  kubeConfig:
+    locationType: Secret
+    location: multikueue-cluster3
+---
+apiVersion: kueue.x-k8s.io/v1beta1
+kind: MultiKueueCluster
+metadata:
+  name: multikueue-config-demo1-cluster4
+spec:
+  kubeConfig:
+    locationType: Secret
+    location: multikueue-cluster4
