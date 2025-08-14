@@ -5,6 +5,13 @@ import (
 	"os"
 )
 
+const (
+	// ClusterProxyURLEnv is the environment variable for cluster proxy URL
+	ClusterProxyURLEnv = "CLUSTER_PROXY_URL"
+	// KueueNamespaceEnv is the environment variable for kueue installed namespace
+	KueueNamespaceEnv = "KUEUE_NAMESPACE"
+)
+
 var (
 	// MultiKueueResourceName is the name used for MultiKueue-related secrets
 	MultiKueueResourceName = "multikueue"
@@ -17,7 +24,7 @@ var (
 )
 
 func getKueueNamespace() string {
-	ns := os.Getenv("KUEUE_NAMESPACE")
+	ns := os.Getenv(KueueNamespaceEnv)
 	if ns == "" {
 		return "kueue-system"
 	}

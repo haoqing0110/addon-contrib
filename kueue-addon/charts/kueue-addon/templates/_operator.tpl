@@ -43,14 +43,11 @@ Operator Resources - Single Template
   metadata:
     name: cluster
     labels:
-      app.kubernetes.io/managed-by: kustomize
       app.kubernetes.io/name: kueue-operator
   spec:
-    config:
-      integrations:
-        frameworks:
-        - BatchJob
-    managementState: Managed
+    {{- if .Values.kueueCR.spec }}
+{{ toYaml .Values.kueueCR.spec | indent 4 }}
+    {{- end }}
 - apiVersion: v1
   kind: Namespace
   metadata:

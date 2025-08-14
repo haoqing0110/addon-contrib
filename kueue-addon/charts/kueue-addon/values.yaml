@@ -44,15 +44,28 @@ localQueue:
 kueue:
   namespace: "kueue-system"
 
+# Cluster proxy configuration
+clusterProxy:
+  # URL for the cluster proxy service, used to access managed clusters through a proxy
+  # When set, the controller will use this URL to connect to managed clusters
+  # Example: "https://cluster-proxy.example.com/clusters/"
+  url: ""
+
+# NetworkPolicy configuration (uncomment when needed)
+# networkPolicy:
+#   name: kueue-allow-egress-cluster-proxy-dns
+#   namespace: "kueue-system"
+#   spec: {}
+
 # Install Kueue via Operator
 installKueueViaOperator: false
 
-# Operator Lifecycle Manager RBAC configuration (uncomment when needed)
+# Operator Lifecycle Manager RBAC configuration (uncomment when installKueueViaOperator enabled)
 # operatorLifecycleManager:
 #   clusterRoleBindingName: <cluster-role-binding-name>
 #   clusterRoleName: <cluster-role-name>
 
-# Kueue Operator configuration (uncomment when needed)
+# Kueue Operator configuration (uncomment when installKueueViaOperator enabled)
 # kueueOperator:
 #   name: <operator-name>
 #   namespace: <operator-namespace>
@@ -62,7 +75,7 @@ installKueueViaOperator: false
 #   sourceNamespace: <source-namespace>
 #   startingCSV: <starting-csv>
 
-# Cert Manager Operator configuration (uncomment when needed)
+# Cert Manager Operator configuration (uncomment when installKueueViaOperator enabled)
 # certManagerOperator:
 #   name: <cert-manager-operator-name>
 #   namespace: <cert-manager-namespace>
@@ -71,3 +84,12 @@ installKueueViaOperator: false
 #   source: <cert-manager-source>
 #   sourceNamespace: <cert-manager-source-namespace>
 #   startingCSV: <cert-manager-starting-csv>
+
+# Kueue CR customization (uncomment when installKueueViaOperator enabled)
+# kueueCR:
+#   spec:
+#     config:
+#       integrations:
+#         frameworks:
+#         - BatchJob
+#     managementState: Managed
