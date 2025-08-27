@@ -1,0 +1,7 @@
+✗ helm upgrade --install \
+     -n open-cluster-management-addon --create-namespace \
+     kueue-addon ./charts/kueue-addon \
+     -f build/values.ocp.yaml
+Release "kueue-addon" does not exist. Installing it now.
+Error: 1 error occurred:
+	* ClusterManagementAddOn.addon.open-cluster-management.io "multicluster-kueue-manager" is invalid: spec.installStrategy.placements[0].name: Required value
