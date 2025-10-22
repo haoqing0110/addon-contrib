@@ -72,38 +72,28 @@ if __name__ == '__main__':
         sys.exit()
 
     # Filter tags that match the current repo_name prefix
+    # Use exact prefix match to avoid matching similar repo names
     repo_tags = []
     for tag in tags:
-        if tag.name.startswith(repo_name):
+        if tag.name.startswith(repo_name + '/'):
             repo_tags.append(tag)
 
-    # Debug output
-    print(f"DEBUG: repo_name = {repo_name}")
-    print(f"DEBUG: release_tag = {release_tag}")
-    print(f"DEBUG: All tags (first 10):")
-    for i, tag in enumerate(tags):
-        if i >= 10:
-            break
-        print(f"  [{i}] {tag.name}")
-    print(f"DEBUG: Filtered repo_tags:")
-    for i, tag in enumerate(repo_tags):
-        print(f"  [{i}] {tag.name}")
-    print()
-
-    if len(repo_tags) == 0:
+    if len(repo_tags) <= 1:
         # First release for this repo - no previous tags to compare
+        # (0 = not tagged yet, 1 = only current tag exists)
         last_release_tag = None
     else:
         # Find the previous release tag (second in the filtered list)
         # repo_tags[0] is current release, repo_tags[1] is previous
-        last_release_tag = repo_tags[0].name
+        last_release_tag = repo_tags[1].name
 
     # get related PR from the last release tag
     last_release_pr = 0
     release_word = "in"
 
-    if len(repo_tags) > 1:
+    if last_release_tag:
         release_word = "since"
+        # Find the tag object to get its commit and associated PRs
         for tag in tags:
             if tag.name == last_release_tag:
                 tag_pulls = tag.commit.get_pulls()
