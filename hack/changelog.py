@@ -91,14 +91,12 @@ if __name__ == '__main__':
     print()
 
     if len(repo_tags) == 0:
-        print(f"no tags found for {repo_name}")
-        sys.exit()
-    elif len(repo_tags) == 1:
-        # First release for this repo
-        last_release_tag = repo_tags[0].name
+        # First release for this repo - no previous tags to compare
+        last_release_tag = None
     else:
         # Find the previous release tag (second in the filtered list)
-        last_release_tag = repo_tags[1].name
+        # repo_tags[0] is current release, repo_tags[1] is previous
+        last_release_tag = repo_tags[0].name
 
     # get related PR from the last release tag
     last_release_pr = 0
@@ -141,8 +139,11 @@ if __name__ == '__main__':
 
     # Print
     print("# %s %s" % (repo_name, release_tag))
-    print("\n**changes %s [%s](https://github.com/open-cluster-management-io/releases/%s)**\n"
-          % (release_word, last_release_tag, last_release_tag))
+    if last_release_tag:
+        print("\n**changes %s [%s](https://github.com/open-cluster-management-io/releases/%s)**\n"
+              % (release_word, last_release_tag, last_release_tag))
+    else:
+        print("\n**Initial release**\n")
     section_if_present(breakings, ":warning: Breaking Changes")
     section_if_present(features, ":sparkles: New Features")
     section_if_present(bugs, ":bug: Bug Fixes")
