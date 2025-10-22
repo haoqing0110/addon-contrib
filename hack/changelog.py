@@ -65,21 +65,45 @@ if __name__ == '__main__':
     repo = g.get_repo("open-cluster-management-io/addon-contrib")
     pulls = repo.get_pulls(state='closed', sort='created', base='main', direction='desc')
 
-    # get the last release tag
+    # get the last release tag for this specific sub repo
     tags = repo.get_tags()
     if tags.totalCount == 0:
         print("no tags in the repo")
         sys.exit()
-    elif tags.totalCount == 1:
-        last_release_tag = tags[0].name
+
+    # Filter tags that match the current repo_name prefix
+    repo_tags = []
+    for tag in tags:
+        if tag.name.startswith(repo_name):
+            repo_tags.append(tag)
+
+    # Debug output
+    print(f"DEBUG: tag_prefix = {tag_prefix}")
+    print(f"DEBUG: All tags (first 10):")
+    for i, tag in enumerate(tags):
+        if i >= 10:
+            break
+        print(f"  [{i}] {tag.name}")
+    print(f"DEBUG: Filtered repo_tags:")
+    for i, tag in enumerate(repo_tags):
+        print(f"  [{i}] {tag.name}")
+    print()
+
+    if len(repo_tags) == 0:
+        print(f"no tags found for {repo_name}")
+        sys.exit()
+    elif len(repo_tags) == 1:
+        # First release for this repo
+        last_release_tag = repo_tags[0].name
     else:
-        last_release_tag = tags[1].name
+        # Find the previous release tag (second in the filtered list)
+        last_release_tag = repo_tags[1].name
 
     # get related PR from the last release tag
     last_release_pr = 0
     release_word = "in"
 
-    if tags.totalCount > 1:
+    if len(repo_tags) > 1:
         release_word = "since"
         for tag in tags:
             if tag.name == last_release_tag:
