@@ -1,7 +1,7 @@
 FROM golang:1.22 AS builder
 WORKDIR /go/src/open-cluster-management.io/addon-contrib/resource-usage-collect-addon
 COPY . .
-ENV GO_PACKAGE open-cluster-management.io/addon-contrib/resource-usage-collect-addon
+ENV GO_PACKAGE=open-cluster-management.io/addon-contrib/resource-usage-collect-addon
 
 RUN make build --warn-undefined-variables
 
