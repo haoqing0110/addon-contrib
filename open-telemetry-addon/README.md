@@ -220,3 +220,4 @@ kubectl --context kind-cluster1 exec -n open-cluster-management-agent-addon \
    kubectl get secret prometheus-tls -n open-cluster-management-addon
    kubectl get secret otel-signer -n open-cluster-management-hub
    ```
+
