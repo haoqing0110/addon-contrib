@@ -12,7 +12,7 @@ env:
 
 jobs:
   reviewable:
-    name: Run verify build and test
+    name: verify build unit and integration
     runs-on: ubuntu-latest
     concurrency:
       group: test-${{ github.ref }}-${{ inputs.repo }}-reviewable
@@ -56,7 +56,7 @@ jobs:
         run: cd ${{ inputs.repo }} && make test-integration
 
   test-chart:
-    name: Run Helm Chart Tests
+    name: image and helm chart
     runs-on: ubuntu-latest
     if: hashFiles('${{ inputs.repo }}/charts/**') != ''
     permissions:
@@ -89,24 +89,12 @@ jobs:
         with:
           version: v3.13.0
 
-      - name: Set up Docker Buildx
-        id: buildx
-        uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3
-
-      - name: Run chart-testing (list-changed)
-        id: list-changed
-        run: |
-          set -e
-          changed=$(ct list-changed --chart-dirs ${{ inputs.repo }}/charts)
-          echo $changed
-          if [[ -n "$changed" ]]; then
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "No Helm changes detected. Skipping chart testing!"
-          fi
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
 
       - name: Prime Helm repos
-        if: steps.list-changed.outputs.changed == 'true'  
         id: prime-helm-repos
         run: |
           set -e
@@ -125,7 +113,6 @@ jobs:
           helm dependency update ${{ inputs.repo }}/charts/${{ inputs.repo }}
 
       - name: Run chart-testing (lint)
-        if: steps.list-changed.outputs.changed == 'true'
         run: ct lint --chart-dirs ${{ inputs.repo }}/charts --check-version-increment=false
 
       - name: Format cluster name
@@ -138,7 +125,6 @@ jobs:
           echo "cluster_name=$cluster_name" >> "$GITHUB_OUTPUT"
 
       - name: Create kind cluster
-        if: steps.list-changed.outputs.changed == 'true'
         uses: helm/kind-action@a1b0e391336a6ee6713a0583f8c6240d70863de3 # v1.12.0
         with:
           version: v0.27.0
@@ -152,25 +138,16 @@ jobs:
           repository: ${{ inputs.repo }}
 
       - name: Build Docker Image
-        if: steps.list-changed.outputs.changed == 'true' && steps.check-dockerfile.outputs.exists == 'true'
-        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6
-        with:
-          context: ./${{ inputs.repo }}
-          file: ./${{ inputs.repo }}/Dockerfile
-          platforms: linux/amd64
-          tags: |
-            ${{ env.IMAGE }}:${{ env.IMAGE_TAG }}
-          builder: ${{ steps.buildx.outputs.name }}
-          push: false
-          cache-from: type=gha,scope=${{ github.ref_name }}-${{ env.IMAGE }}:${{ env.IMAGE_TAG }}
-          cache-to: type=gha,scope=${{ github.ref_name }}-${{ env.IMAGE }}:${{ env.IMAGE_TAG }}
-          load: true
+        if: steps.check-dockerfile.outputs.exists == 'true'
+        run: |
+          set -e
+          cd ${{ inputs.repo }}
+          IMAGE=${{ env.IMAGE }} IMAGE_TAG=${{ env.IMAGE_TAG }} make image
 
-      - name: Load image & create namespace
-        if: steps.list-changed.outputs.changed == 'true' && steps.check-dockerfile.outputs.exists == 'true'
+      - name: Load image into Kind
+        if: steps.check-dockerfile.outputs.exists == 'true'
         run: |
           kind load docker-image ${{ env.IMAGE }}:${{ env.IMAGE_TAG }} --name ${{ steps.format-cluster-name.outputs.cluster_name }}
 
       - name: Run chart-testing (install)
-        if: steps.list-changed.outputs.changed == 'true'
         run: cd ${{ inputs.repo }} && make test-chart
