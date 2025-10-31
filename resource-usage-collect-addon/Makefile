@@ -123,3 +123,4 @@ image-manifest: ## Create and push multi-arch manifest
 	docker manifest annotate $(IMAGE_NAME) \
 		$(IMAGE_REGISTRY)/$(IMAGE):$(IMAGE_TAG)-arm64 --arch arm64
 	docker manifest push $(IMAGE_NAME)
+
